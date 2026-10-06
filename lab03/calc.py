@@ -2,3 +2,4 @@
 b = float(input())
 print(a + b)
 print(a - b)
+print(a * b)
