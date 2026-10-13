@@ -2,10 +2,25 @@
 
 
 def parse_record(line: str) -> dict:
-    """Разбирает строку «город;температура;дата» в словарь."""
+    """Разбирает строку «город;температура;дата» в словарь.
+
+    Возвращает {"city": str, "temp": float, "date": str}.
+    Негодная строка — ValueError с понятным сообщением.
+    """
     parts = line.split(";")
-    city, temp, date = parts
-    return {"city": city, "temp": float(temp), "date": date}
+    if len(parts) != 3:
+        raise ValueError(
+            f"ожидалось 3 поля через ';', получено {len(parts)}: {line!r}"
+        )
+
+    city, temp_raw, date = parts
+
+    if not city.strip():
+        raise ValueError(f"пустой город: {line!r}")
+    if not date.strip():
+        raise ValueError(f"пустая дата: {line!r}")
+
+    return {"city": city.strip(), "temp": float(temp_raw), "date": date.strip()}
 
 
 def read_valid(lines: list[str]) -> list[dict]:
