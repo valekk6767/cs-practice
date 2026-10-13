@@ -1,11 +1,14 @@
-"""Модуль обработки записей метеостанции."""
+"""Модуль обработки записей метеостанции.
+
+Чистые функции: ни ввода с клавиатуры, ни print.
+"""
 
 
 def parse_record(line: str) -> dict:
     """Разбирает строку «город;температура;дата» в словарь.
 
-    Возвращает {"city": str, "temp": float, "date": str}.
-    Негодная строка — ValueError с понятным сообщением.
+    Возвращает {"city": str, "temperature": float, "date": str}.
+    Любая негодная строка — ValueError с понятным сообщением.
     """
     parts = line.split(";")
     if len(parts) != 3:
@@ -14,18 +17,23 @@ def parse_record(line: str) -> dict:
         )
 
     city, temp_raw, date = parts
+    city = city.strip()
+    temp_raw = temp_raw.strip()
+    date = date.strip()
 
-    if not city.strip():
+    if not city:
         raise ValueError(f"пустой город: {line!r}")
-    if not date.strip():
+    if not date:
         raise ValueError(f"пустая дата: {line!r}")
 
+    # допускаем и точку, и запятую как десятичный разделитель
+    normalized = temp_raw.replace(",", ".")
     try:
-        temp = float(temp_raw)
+        temperature = float(normalized)
     except ValueError as exc:
         raise ValueError(f"температура не число: {temp_raw!r}") from exc
 
-    return {"city": city.strip(), "temp": temp, "date": date.strip()}
+    return {"city": city, "temperature": temperature, "date": date}
 
 
 def read_valid(lines: list[str]) -> list[dict]:
@@ -47,8 +55,9 @@ def average_by_city(records: list[dict]) -> dict:
     count = {}
     for rec in records:
         city = rec["city"]
-        total[city] = total.get(city, 0.0) + rec["temp"]
+        total[city] = total.get(city, 0.0) + rec["temperature"]
         count[city] = count.get(city, 0) + 1
+
     return {city: round(total[city] / count[city], 1) for city in total}
 
 
@@ -57,5 +66,8 @@ def warmest_city(records: list[dict]) -> str:
 
     При равенстве — первый по алфавиту.
     """
+    if not records:
+        raise ValueError("нет записей для определения самого тёплого города")
+
     averages = average_by_city(records)
     return sorted(averages, key=lambda c: (-averages[c], c))[0]
