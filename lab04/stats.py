@@ -20,7 +20,12 @@ def parse_record(line: str) -> dict:
     if not date.strip():
         raise ValueError(f"пустая дата: {line!r}")
 
-    return {"city": city.strip(), "temp": float(temp_raw), "date": date.strip()}
+    try:
+        temp = float(temp_raw)
+    except ValueError as exc:
+        raise ValueError(f"температура не число: {temp_raw!r}") from exc
+
+    return {"city": city.strip(), "temp": temp, "date": date.strip()}
 
 
 def read_valid(lines: list[str]) -> list[dict]:
