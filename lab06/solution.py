@@ -40,3 +40,4 @@ def human_size(n_bytes):
         return f"{size:.1f} ГБ"
     size = size / 1024
     return f"{size:.1f} ТБ"
+
